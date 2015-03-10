@@ -1,4 +1,4 @@
 # serverside
 data layer
 
-Server address: serenity-valley.ddns.net
+Server address: http://serenity-valley.ddns.net
