@@ -8,12 +8,12 @@ create table User 		(
 						);
 
 create table Message	(
-							messageID int primary key auto_increment,
-							posterID int references User(userID),
-							parentID int references Message(messageID),
+							messageID int not null primary key auto_increment,
+							posterID int not null references User(userID),
+							parentID int default null references Message(messageID),
 							content varchar(1024),
 							lat float(10,6),
 							lon float(10,6),
-							numUpvotes int,
-							numDownvotes int
+							numUpvotes int default 0,
+							numDownvotes int default 0
 						); 
