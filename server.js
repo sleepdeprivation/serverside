@@ -1,3 +1,4 @@
+#!/usr/bin/nodejs
 var express = require('express');
 var bodyParser = require('body-parser');
 var corser = require('corser');
@@ -13,11 +14,11 @@ app.use(bodyParser.json());
 /* DATABASE CONFIGURATION */
 var connection = mysql.createConnection({
     host: 'localhost',
-    user: 'groovy',
-    password: 'groovyPassword'
+    user: 'hermes',
+    password: 'apollo11'
 });
 
-var dbToUse = 'groovy';
+var dbToUse = 'Hermes';
 
 //use the database for any queries run
 var useDatabaseQry = 'USE ' + dbToUse;
@@ -154,5 +155,5 @@ app.get('/getAllHeads', function(req, res){
 
 
 
-app.set("port", "8003");
+app.set("port", "8001");
 app.listen(app.get("port"));
