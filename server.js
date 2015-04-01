@@ -83,6 +83,19 @@ app.post('/asdf', function(req, res){
 	res.send("that's it");
 });
 
+//Test page for submitting stuff. Debug loads json from test file, so nothing needs to actually be sent
+app.get('/submit', function (req, res){
+	var responseHTML = 	'<form method="post" action="/submit/newop">\n' + 
+				'<input type="submit" name="submitop" value="Submit test OP">\n' + 
+				'</form>\n<br />\n';
+	//reply route hasn't been set up yet
+	//var responseHTML +=	'<form method="post" action="/submit/newreply>\n' + 
+	//			'<input type="submit" name="submitreply" value="Submit test reply">\n'+
+	//			'</form>';
+	res.send(responseHTML);
+});
+	
+
 app.post('/submit/newop', function(req, res){
 	console.log(req.body);
 	//using local JSON file for testing
