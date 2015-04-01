@@ -3,6 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var corser = require('corser');
 var mysql = require('mysql');
+var fs = require('fs');		//for loading debug JSON objects from file, remove later
 var app = express();
 
 
@@ -80,6 +81,21 @@ app.post('/asdf', function(req, res){
 	console.log("Got a post, here's the body");
 	console.log(req.body);
 	res.send("that's it");
+});
+
+app.post('/submit/newop', function(req, res){
+	console.log(req.body);
+	//using local JSON file for testing
+	var post = fs.readFile('testpost.json', function (err,data) {
+		if (err) {
+			console.log(err);
+		}
+	});
+	console.log(post);
+	//var qry = connection.query('INSERT INTO HeadMessage SET ?', post, function(err, result) { 
+		
+	//});
+	//console.log(qry.sql);
 });
 
 /*
