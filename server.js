@@ -141,6 +141,10 @@ app.get('/getPostsByRange', function(req, res){
 		lonMin = req.lonMin,
 		latMax = req.latMax,
 		lonMax = req.lonMax;
+	console.log('latMin='+latMin+'\n'+
+		'lonMin='+lonMin+'\n'+
+		'latMax='+latMax+'\n'+
+		'lonMax='+lonMax+'\n');
 
 	var qry = 'SELECT * FROM HeadMessage WHERE lat>=' + mysql.escape(latMin) +
 		' AND lat<=' + mysql.escape(latMax) + 
