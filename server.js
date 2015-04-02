@@ -137,10 +137,10 @@ app.post('/submit/newop', function(req, res){
 */
 
 app.get('/getPostsByRange', function(req, res){
-	var 	latMin = req.query.latMin,
-		lonMin = req.query.lonMin,
-		latMax = req.query.latMax,
-		lonMax = req.query.lonMax;
+	var 	latMin = parseFloat(req.query.latMin),
+		lonMin = parseFloat(req.query.lonMin),
+		latMax = parseFloat(req.query.latMax),
+		lonMax = parseFloat(req.query.lonMax);
 	console.log('latMin='+latMin+'\n'+
 		'lonMin='+lonMin+'\n'+
 		'latMax='+latMax+'\n'+
