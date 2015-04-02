@@ -74,13 +74,13 @@ function getAllHeads(callback){
 //Debug UI, remove later
 app.get('/', function(req, res){
 	var responseHTML = '<h1>Debug frontend for Hermes DB</h1>\n' +
-		'<a href="/submit">Submit</a><br />\n' +
+		'<p><a href="/submit">Submit routes</a></p>\n' +
 		'<form action="/getPostsByRange">\n' + 
 		'<p>getPostsByRange</p>\n' +
-		'latMin: <input type="text" id="latMin" name="latMin" />\n' +
-		'latMax: <input type="text" id="latMax" name="latMax" />\n' +
-		'lonMin: <input type="text" id="lonMin" name="lonMin" />\n' +
-		'lonMax: <input type="text" id="lonMax" name="lonMax" />\n' +
+		'latMin: <input type="text" id="latMin" name="latMin" /><br />\n' +
+		'lonMin: <input type="text" id="lonMin" name="lonMin" /><br />\n' +
+		'latMax: <input type="text" id="latMax" name="latMax" /><br />\n' +
+		'lonMax: <input type="text" id="lonMax" name="lonMax" /><br />\n' +
 		'<input type="submit" />\n' + 
 		'</form>';
 	res.send(responseHTML);
@@ -138,14 +138,15 @@ app.post('/submit/newop', function(req, res){
 
 app.get('/getPostsByRange', function(req, res){
 	var 	latMin = parseFloat(req.latMin),
-		latMax = parseFloat(req.latMax),
 		lonMin = parseFloat(req.lonMin),
+		latMax = parseFloat(req.latMax),
 		lonMax = parseFloat(req.lonMax);
 
 	var qry = 'SELECT * FROM HeadMessage WHERE lat>=' + mysql.escape(latMin) +
-		'AND lat<=' + mysql.escape(latMax) + 
-		'AND lon>=' + mysql.escape(lonMin) + 
-		'AND lon<=' + mysql.escape(lonMax);
+		' AND lat<=' + mysql.escape(latMax) + 
+		' AND lon>=' + mysql.escape(lonMin) + 
+		' AND lon<=' + mysql.escape(lonMax);
+	console.log(qry)
 	connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
@@ -155,7 +156,7 @@ app.get('/getPostsByRange', function(req, res){
 			res.send(result);
 		}
 	});
-	console.log(qry.sql);
+	//console.log(qry.sql);
 });
 
 app.get('/getPostsByUser', function(req, res){
