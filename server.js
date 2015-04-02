@@ -97,12 +97,14 @@ app.get('/submit', function (req, res){
 	
 
 app.post('/submit/newop', function(req, res){
-	console.log(req.body);
+	//console.log(req.body);
 	//using local JSON file for testing
-	var post = fs.readFile('testpost.json', function (err,data) {
+	var post = fs.readFileSync('./testpost.json', 'utf8', function (err,data) {
 		if (err) {
 			console.log(err);
 		}
+	//	console.log(data);
+	//	return data;
 	});
 	console.log(post);
 	//var qry = connection.query('INSERT INTO HeadMessage SET ?', post, function(err, result) { 
