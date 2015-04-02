@@ -108,10 +108,12 @@ app.post('/submit/newop', function(req, res){
 	});
 	var jspost = JSON.parse(post);
 	console.log(jspost.content);
-	//var qry = connection.query('INSERT INTO HeadMessage SET ?', post, function(err, result) { 
-		
-	//});
-	//console.log(qry.sql);
+	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) { 
+		if (err){
+			res.send(err)
+		}
+	});
+	console.log(qry.sql);
 });
 
 /*
