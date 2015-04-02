@@ -137,10 +137,10 @@ app.post('/submit/newop', function(req, res){
 */
 
 app.get('/getPostsByRange', function(req, res){
-	var 	latMin = parseFloat(req.latMin),
-		lonMin = parseFloat(req.lonMin),
-		latMax = parseFloat(req.latMax),
-		lonMax = parseFloat(req.lonMax);
+	var 	latMin = req.latMin,
+		lonMin = req.lonMin,
+		latMax = req.latMax,
+		lonMax = req.lonMax;
 
 	var qry = 'SELECT * FROM HeadMessage WHERE lat>=' + mysql.escape(latMin) +
 		' AND lat<=' + mysql.escape(latMax) + 
