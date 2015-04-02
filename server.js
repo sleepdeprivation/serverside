@@ -106,7 +106,8 @@ app.post('/submit/newop', function(req, res){
 	//	console.log(data);
 	//	return data;
 	});
-	console.log(post);
+	var jspost = JSON.parse(post);
+	console.log(jspost.content);
 	//var qry = connection.query('INSERT INTO HeadMessage SET ?', post, function(err, result) { 
 		
 	//});
