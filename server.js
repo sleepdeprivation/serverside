@@ -3,7 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var corser = require('corser');
 var mysql = require('mysql');
-var fs = require('fs');		//for loading debug JSON objects from file, remove later
+//var fs = require('fs');		//for loading debug JSON objects from file, remove later
 var app = express();
 
 
@@ -71,19 +71,21 @@ function getAllHeads(callback){
 	);
 }
 
-/*
-	Template for incoming requests
-	JSON block will be in req.body. It will need to be
-	funnelled into the correct database tables
-	Probably we should set up different routes expecting different inputs
-*/
-app.post('/asdf', function(req, res){
-	console.log("Got a post, here's the body");
-	console.log(req.body);
-	res.send("that's it");
+//Debug UI, remove later
+app.get('/', function(req, res){
+	var responseHTML = '<h1>Debug frontend for Hermes DB</h1>\n' +
+		'<a href="/submit">Submit</a><br />\n' +
+		'<form action="/getPostsByRange">\n' + 
+		'<p>getPostsByRange</p>\n' +
+		'latMin: <input type="text" id="latMin" name="latMin" />\n' +
+		'latMax: <input type="text" id="latMax" name="latMax" />\n' +
+		'lonMin: <input type="text" id="lonMin" name="lonMin" />\n' +
+		'lonMax: <input type="text" id="lonMax" name="lonMax" />\n' +
+		'<input type="submit" />\n' + 
+		'</form>';
+	res.send(responseHTML);
 });
 
-//Test page for submitting stuff. Debug loads json from test file, so nothing needs to actually be sent
 app.get('/submit', function (req, res){
 	var responseHTML = 	'<form method="post" action="/submit/newop">\n' + 
 				'<input type="submit" name="submitop" value="Submit test OP">\n' + 
@@ -94,20 +96,31 @@ app.get('/submit', function (req, res){
 	//			'</form>';
 	res.send(responseHTML);
 });
-	
+
+/*
+	Template for incoming requests
+	JSON block will be in req.body. It will need to be
+	funnelled into the correct database tables
+	Probably we should set up different routes expecting different inputs
+*/
+app.post('/asdf', function(req, res){
+	console.log("Got a post, here's the body");
+	console.log(req.body);
+	res.send("that's it");
+});	
 
 app.post('/submit/newop', function(req, res){
-	//console.log(req.body);
-	//using local JSON file for testing
-	var post = fs.readFileSync('./testpost.json', 'utf8', function (err,data) {
-		if (err) {
-			console.log(err);
-		}
+	console.log(req.body);
+	//using local JSON file for testing. TODO: switch this over to req.body
+	//var post = fs.readFileSync('./testpost.json', 'utf8', function (err,data) {
+	//	if (err) {
+	//		console.log(err);
+	//	}
 	//	console.log(data);
 	//	return data;
 	});
-	var jspost = JSON.parse(post);
-	console.log(jspost.content);
+	var jspost = JSON.parse(req.body);
+	//console.log(jspost.content);
 	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) { 
 		if (err){
 			res.send(err)
@@ -122,6 +135,28 @@ app.post('/submit/newop', function(req, res){
 	and can use it in a mysql query or what have you
 	We should set up different routes for different types of queries
 */
+
+app.get('/getPostsByRange', function(req, res){
+	var 	latMin = parseFloat(req.latMin),
+		latMax = parseFloat(req.latMax),
+		lonMin = parseFloat(req.lonMin),
+		lonMax = parseFloat(req.lonMax);
+
+	var qry = 'SELECT * FROM HeadMessage WHERE lat>=' + mysql.escape(latMin) +
+		'AND lat<=' + mysql.escape(latMax) + 
+		'AND lon>=' + mysql.escape(lonMin) + 
+		'AND lon<=' + mysql.escape(lonMax);
+	connection.query(qry, function(err, result) { 
+		if (err){
+			res.send(err);
+		}
+		else {
+			res.send(result);
+		}
+	});
+	console.log(qry.sql);
+});
+
 app.get('/getPostsByUser', function(req, res){
 	var userID = parseInt(req.query.userid);
 
