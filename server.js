@@ -118,7 +118,7 @@ app.post('/submit/newop', function(req, res){
 	//	}
 	//	console.log(data);
 	//	return data;
-	});
+	//});
 	var jspost = JSON.parse(req.body);
 	//console.log(jspost.content);
 	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) { 
@@ -151,6 +151,7 @@ app.get('/getPostsByRange', function(req, res){
 			res.send(err);
 		}
 		else {
+			console.log(result);
 			res.send(result);
 		}
 	});
