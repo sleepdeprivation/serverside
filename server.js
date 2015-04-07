@@ -187,8 +187,8 @@ app.get('/getPostsByUser', function(req, res){
 });
 
 app.get('/getRepliesTo', function(req, res){
-	var messageID = parseInt(req.query.messageID);
-	var qry = 'SELECT * FROM ReplyMessage WHERE messageID=' + mysql.escape(messageID);
+	var parentID = parseInt(req.query.parentID);
+	var qry = 'SELECT * FROM ReplyMessage WHERE parentID=' + mysql.escape(parentID);
 	console.log(qry);
 	connection.query(qry, function(err, result) {
 		if (err) {
