@@ -150,7 +150,7 @@ app.get('/getPostsByRange', function(req, res){
 		' AND lat<=' + mysql.escape(latMax) + 
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
-	console.log(qry)
+	console.log(qry);
 	connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
@@ -186,8 +186,24 @@ app.get('/getPostsByUser', function(req, res){
 	}
 });
 
-
 app.get('/getRepliesTo', function(req, res){
+	var messageID = parseInt(req.query.messageID);
+	var qry = 'SELECT * FROM ReplyMessage WHERE messageID=' + mysql.escape(messageID);
+	console.log(qry);
+	connection.query(qry, function(err, result) {
+		if (err) {
+			res.send(err);
+		}
+		else {
+			console.log(result);
+			res.send(result);
+		}
+	});
+});
+	
+
+//CB's old getRepliesTo function
+app.get('/getRepliesTo/old', function(req, res){
 	var messageID = String(req.query.messageID);
 
 	//good to know:
