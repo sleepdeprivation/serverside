@@ -107,13 +107,13 @@ app.get('/submit', function (req, res){
 app.post('/submit/newop', function(req, res){
 	console.log(req.body);
 	//using local JSON file for testing. TODO: switch this over to req.body
-	var post = fs.readFileSync('./testpost.json', 'utf8', function (err,data) {
-		if (err) {
-			console.log(err);
-		}
-		console.log(data);
-		return data;
-	});
+	//var post = fs.readFileSync('./testpost.json', 'utf8', function (err,data) {
+	//	if (err) {
+	//		console.log(err);
+	//	}
+	//	console.log(data);
+	//	return data;
+	//});
 	var jspost = JSON.parse(req.body);
 	//console.log(jspost.content);
 	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) { 
