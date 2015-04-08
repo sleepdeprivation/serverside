@@ -127,7 +127,7 @@ app.post('/submit/newop', function(req, res){
 app.post('/submit/newreply', function(req, res) {
 	console.log(req.body);
 	var jspost = JSON.parse(req.body);
-	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) {
+	var qry = connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
 		if (err) {
 			res.send(err);
 		}
