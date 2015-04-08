@@ -102,12 +102,7 @@ app.get('/submit', function (req, res){
 	JSON block will be in req.body. It will need to be
 	funnelled into the correct database tables
 	Probably we should set up different routes expecting different inputs
-*/
-app.post('/asdf', function(req, res){
-	console.log("Got a post, here's the body");
-	console.log(req.body);
-	res.send("that's it");
-});	
+*/	
 
 app.post('/submit/newop', function(req, res){
 	console.log(req.body);
@@ -123,7 +118,18 @@ app.post('/submit/newop', function(req, res){
 	//console.log(jspost.content);
 	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) { 
 		if (err){
-			res.send(err)
+			res.send(err);
+		}
+	});
+	console.log(qry.sql);
+});
+
+app.post('/submit/newreply', function(req, res) {
+	console.log(req.body);
+	var jspost = JSON.parse(req.body);
+	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) {
+		if (err) {
+			res.send(err);
 		}
 	});
 	console.log(qry.sql);
