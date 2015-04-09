@@ -103,22 +103,15 @@ app.get('/submit', function (req, res){
 	funnelled into the correct database tables
 	Probably we should set up different routes expecting different inputs
 */	
-
 app.post('/submit/newop', function(req, res){
 	console.log(req.body);
-	//using local JSON file for testing. TODO: switch this over to req.body
-	//var post = fs.readFileSync('./testpost.json', 'utf8', function (err,data) {
-	//	if (err) {
-	//		console.log(err);
-	//	}
-	//	console.log(data);
-	//	return data;
-	//});
-	var jspost = JSON.parse(req.body);
-	//console.log(jspost.content);
-	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) { 
+	var jspost = req.body;
+	var qry = connection.query('INSERT INTO HeadMessage SET ?;', jspost,
+	function(err, result) { 
 		if (err){
 			res.send(err);
+		}else{
+			res.send(result);
 		}
 	});
 	console.log(qry.sql);
