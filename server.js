@@ -1,38 +1,25 @@
 #!/usr/bin/nodejs
 var express = require('express');
 var bodyParser = require('body-parser');
-//var corser = require('corser');
 var mysql = require('mysql');
+var database = require('./database.js');
+
 //var fs = require('fs');		//for loading debug JSON objects from file, remove later
 var app = express();
 
-
-//app.use(corser.create());
 app.use(bodyParser.json());
 
 
 
-/* DATABASE CONFIGURATION */
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'hermes',
-    password: 'apollo11'
-});
-
-var dbToUse = 'Hermes';
-
-//use the database for any queries run
-var useDatabaseQry = 'USE ' + dbToUse;
-
 
 //this table exists
 //create the User table if it does not exist
-connection.query(useDatabaseQry, function (err) {
+database.connection.query(database.useDatabaseQry, function (err) {
     if (err) throw err;
 });
 
 function getUserPosts(userID, callback){
-	connection.query('select username from HeadMessage where userID=?;', [userID],
+	database.connection.query('select username from HeadMessage where userID=?;', [userID],
 		function (err, result){
 			if(err){
 				console.log(err);
@@ -45,7 +32,7 @@ function getUserPosts(userID, callback){
 }
 
 function getChildrenOf(messageID, callback){
-	connection.query('select * from ReplyMessages where parentID=?;', [messageID],
+	database.connection.query('select * from ReplyMessages where parentID=?;', [messageID],
 		function (err, result){
 			if(err){
 				console.log(err);
@@ -59,7 +46,7 @@ function getChildrenOf(messageID, callback){
 
 
 function getAllHeads(callback){
-	connection.query('select * from HeadMessage;',
+	database.connection.query('select * from HeadMessage;',
 		function (err, result){
 			if(err){
 				console.log(err);
@@ -106,7 +93,7 @@ app.get('/submit', function (req, res){
 app.post('/submit/newop', function(req, res){
 	console.log(req.body);
 	var jspost = req.body;
-	var qry = connection.query('INSERT INTO HeadMessage SET ?;', jspost,
+	var qry = database.connection.query('INSERT INTO HeadMessage SET ?;', jspost,
 	function(err, result) { 
 		if (err){
 			res.send(err);
@@ -120,7 +107,7 @@ app.post('/submit/newop', function(req, res){
 app.post('/submit/newreply', function(req, res) {
 	console.log(req.body);
 	var jspost = JSON.parse(req.body);
-	var qry = connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
+	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
 		if (err) {
 			res.send(err);
 		}
@@ -152,7 +139,7 @@ app.get('/getPostsByRange', function(req, res){
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
 	console.log(qry);
-	connection.query(qry, function(err, result) { 
+	database.connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
 		}
@@ -193,7 +180,7 @@ app.get('/getRepliesTo', function(req, res){
 		' FROM ReplyMessage JOIN H_User ON H_User.userID=ReplyMessage.posterID' +
 		' WHERE parentID=' + mysql.escape(parentID);
 	console.log(qry);
-	connection.query(qry, function(err, result) {
+	database.connection.query(qry, function(err, result) {
 		if (err) {
 			res.send(err);
 		}
