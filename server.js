@@ -1,13 +1,13 @@
 #!/usr/bin/nodejs
 var express = require('express');
 var bodyParser = require('body-parser');
-var corser = require('corser');
+//var corser = require('corser');
 var mysql = require('mysql');
 //var fs = require('fs');		//for loading debug JSON objects from file, remove later
 var app = express();
 
 
-app.use(corser.create());
+//app.use(corser.create());
 app.use(bodyParser.json());
 
 
