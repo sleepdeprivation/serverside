@@ -1,5 +1,6 @@
 # serverside
-Server address: http://serenity-valley.ddns.net
+Server address: http://serenity-valley.ddns.net  
+If the server's not running, it can be started by executing /home/hermes/serverside/server.js
 
 Routes
 
