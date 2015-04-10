@@ -145,7 +145,9 @@ app.get('/getPostsByRange', function(req, res){
 		'latMax='+latMax+'\n'+
 		'lonMax='+lonMax+'\n');
 
-	var qry = 'SELECT * FROM HeadMessage WHERE lat>=' + mysql.escape(latMin) +
+	var qry = 'SELECT messageID,posterID,content,lat,lon,numUpvotes,numDownvotes,timePosted,uname' + 
+		' FROM HeadMessage JOIN H_User ON H_User.userID=HeadMessage.posterID' +
+		' WHERE lat>=' + mysql.escape(latMin) +
 		' AND lat<=' + mysql.escape(latMax) + 
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
@@ -187,7 +189,9 @@ app.get('/getPostsByUser', function(req, res){
 
 app.get('/getRepliesTo', function(req, res){
 	var parentID = parseInt(req.query.parentID);
-	var qry = 'SELECT * FROM ReplyMessage WHERE parentID=' + mysql.escape(parentID);
+	var qry = 'SELECT messageID,posterID,parentID,content,numUpvotes,numDownvotes,timePosted,uname' +
+		' FROM ReplyMessage JOIN H_User ON H_User.userID=ReplyMessage.posterID' +
+		' WHERE parentID=' + mysql.escape(parentID);
 	console.log(qry);
 	connection.query(qry, function(err, result) {
 		if (err) {
