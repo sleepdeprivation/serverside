@@ -4,13 +4,8 @@ var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var database = require('./database.js');
 
-//var fs = require('fs');		//for loading debug JSON objects from file, remove later
 var app = express();
-
 app.use(bodyParser.json());
-
-
-
 
 //this table exists
 //create the User table if it does not exist
