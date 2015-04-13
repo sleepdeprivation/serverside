@@ -1,38 +1,20 @@
 #!/usr/bin/nodejs
 var express = require('express');
 var bodyParser = require('body-parser');
-var corser = require('corser');
 var mysql = require('mysql');
-//var fs = require('fs');		//for loading debug JSON objects from file, remove later
+var database = require('./database.js');
+
 var app = express();
-
-
-app.use(corser.create());
 app.use(bodyParser.json());
-
-
-
-/* DATABASE CONFIGURATION */
-var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'hermes',
-    password: 'apollo11'
-});
-
-var dbToUse = 'Hermes';
-
-//use the database for any queries run
-var useDatabaseQry = 'USE ' + dbToUse;
-
 
 //this table exists
 //create the User table if it does not exist
-connection.query(useDatabaseQry, function (err) {
+database.connection.query(database.useDatabaseQry, function (err) {
     if (err) throw err;
 });
 
 function getUserPosts(userID, callback){
-	connection.query('select username from HeadMessage where userID=?;', [userID],
+	database.connection.query('select username from HeadMessage where userID=?;', [userID],
 		function (err, result){
 			if(err){
 				console.log(err);
@@ -45,7 +27,7 @@ function getUserPosts(userID, callback){
 }
 
 function getChildrenOf(messageID, callback){
-	connection.query('select * from ReplyMessages where parentID=?;', [messageID],
+	database.connection.query('select * from ReplyMessages where parentID=?;', [messageID],
 		function (err, result){
 			if(err){
 				console.log(err);
@@ -59,7 +41,7 @@ function getChildrenOf(messageID, callback){
 
 
 function getAllHeads(callback){
-	connection.query('select * from HeadMessage;',
+	database.connection.query('select * from HeadMessage;',
 		function (err, result){
 			if(err){
 				console.log(err);
@@ -103,22 +85,15 @@ app.get('/submit', function (req, res){
 	funnelled into the correct database tables
 	Probably we should set up different routes expecting different inputs
 */	
-
 app.post('/submit/newop', function(req, res){
 	console.log(req.body);
-	//using local JSON file for testing. TODO: switch this over to req.body
-	//var post = fs.readFileSync('./testpost.json', 'utf8', function (err,data) {
-	//	if (err) {
-	//		console.log(err);
-	//	}
-	//	console.log(data);
-	//	return data;
-	//});
-	var jspost = JSON.parse(req.body);
-	//console.log(jspost.content);
-	var qry = connection.query('INSERT INTO HeadMessage SET ?', jspost, function(err, result) { 
+	var jspost = req.body;
+	var qry = database.connection.query('INSERT INTO HeadMessage SET ?;', jspost,
+	function(err, result) { 
 		if (err){
 			res.send(err);
+		}else{
+			res.send(result);
 		}
 	});
 	console.log(qry.sql);
@@ -127,7 +102,7 @@ app.post('/submit/newop', function(req, res){
 app.post('/submit/newreply', function(req, res) {
 	console.log(req.body);
 	var jspost = JSON.parse(req.body);
-	var qry = connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
+	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
 		if (err) {
 			res.send(err);
 		}
@@ -152,12 +127,14 @@ app.get('/getPostsByRange', function(req, res){
 		'latMax='+latMax+'\n'+
 		'lonMax='+lonMax+'\n');
 
-	var qry = 'SELECT * FROM HeadMessage WHERE lat>=' + mysql.escape(latMin) +
+	var qry = 'SELECT messageID,posterID,content,lat,lon,numUpvotes,numDownvotes,timePosted,uname' + 
+		' FROM HeadMessage JOIN H_User ON H_User.userID=HeadMessage.posterID' +
+		' WHERE lat>=' + mysql.escape(latMin) +
 		' AND lat<=' + mysql.escape(latMax) + 
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
 	console.log(qry);
-	connection.query(qry, function(err, result) { 
+	database.connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
 		}
@@ -194,9 +171,11 @@ app.get('/getPostsByUser', function(req, res){
 
 app.get('/getRepliesTo', function(req, res){
 	var parentID = parseInt(req.query.parentID);
-	var qry = 'SELECT * FROM ReplyMessage WHERE parentID=' + mysql.escape(parentID);
+	var qry = 'SELECT messageID,posterID,parentID,content,numUpvotes,numDownvotes,timePosted,uname' +
+		' FROM ReplyMessage JOIN H_User ON H_User.userID=ReplyMessage.posterID' +
+		' WHERE parentID=' + mysql.escape(parentID);
 	console.log(qry);
-	connection.query(qry, function(err, result) {
+	database.connection.query(qry, function(err, result) {
 		if (err) {
 			res.send(err);
 		}
