@@ -103,9 +103,11 @@ app.post('/submit/newreply', function(req, res) {
 	console.log(req.body);
 	var jspost = JSON.parse(req.body);
 	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
-		if (err) {
-			res.send(err);
-		}
+	        if (err){
+                        res.send(err);
+                }else{
+                        res.send(result);
+                }
 	});
 	console.log(qry.sql);
 });
