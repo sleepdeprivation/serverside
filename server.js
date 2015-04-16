@@ -101,7 +101,7 @@ app.post('/submit/newop', function(req, res){
 
 app.post('/submit/newreply', function(req, res) {
 	console.log(req.body);
-	var jspost = JSON.parse(req.body);
+	var jspost = req.body;
 	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
 	        if (err){
                         res.send(err);
@@ -233,5 +233,5 @@ app.get('/getAllHeads', function(req, res){
 
 
 
-app.set("port", "8001");
+app.set("port", "8003");
 app.listen(app.get("port"));
