@@ -20,7 +20,7 @@ DESC="Hermes server"
 NAME=hermes
 DAEMON=/home/hermes/serverside/server.js
 DAEMON_ARGS="--options args"
-DAEMON_USER=hermes
+DAEMONUSER=hermes
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
