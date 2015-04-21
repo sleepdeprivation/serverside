@@ -53,10 +53,21 @@ function getAllHeads(callback){
 	);
 }
 
+// get client's IP for logging purposes
+function logIP(req){
+	var ip = req.headers['x-forwarded-for'] ||
+		req.connection.remoteAddress ||
+		req.socket.remoteAddress ||
+		req.connection.socket.remoteAddress;
+	var currentdate = new Date();
+	var timestamp = currentdate.getFullYear()+'/'+(currentdate.getMonth()+1)+'/'+currentdate.getDate()+' '+
+		currentdate.getHours()+':'+currentdate.getMinutes()+':'+currentdate.getSeconds();
+	console.log(ip + ' ' + timestamp);
+}
+
 //Debug UI, remove later
 app.get('/', function(req, res){
 	var responseHTML = '<h1>Debug frontend for Hermes DB</h1>\n' +
-		'<p><a href="/submit">Submit routes</a></p>\n' +
 		'<form action="/getPostsByRange">\n' + 
 		'<p>getPostsByRange</p>\n' +
 		'latMin: <input type="text" id="latMin" name="latMin" /><br />\n' +
@@ -68,17 +79,6 @@ app.get('/', function(req, res){
 	res.send(responseHTML);
 });
 
-app.get('/submit', function (req, res){
-	var responseHTML = 	'<form method="post" action="/submit/newop">\n' + 
-				'<input type="submit" name="submitop" value="Submit test OP">\n' + 
-				'</form>\n<br />\n';
-	//reply route hasn't been set up yet
-	//var responseHTML +=	'<form method="post" action="/submit/newreply>\n' + 
-	//			'<input type="submit" name="submitreply" value="Submit test reply">\n'+
-	//			'</form>';
-	res.send(responseHTML);
-});
-
 /*
 	Template for incoming requests
 	JSON block will be in req.body. It will need to be
@@ -86,7 +86,7 @@ app.get('/submit', function (req, res){
 	Probably we should set up different routes expecting different inputs
 */	
 app.post('/submit/newop', function(req, res){
-	console.log(req.body);
+	//console.log(req.body);
 	var jspost = req.body;
 	var qry = database.connection.query('INSERT INTO HeadMessage SET ?;', jspost,
 	function(err, result) { 
@@ -96,11 +96,12 @@ app.post('/submit/newop', function(req, res){
 			res.send(result);
 		}
 	});
+	//logIP(req);
 	console.log(qry.sql);
 });
 
 app.post('/submit/newreply', function(req, res) {
-	console.log(req.body);
+	//console.log(req.body);
 	var jspost = req.body;
 	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
 	        if (err){
@@ -124,10 +125,10 @@ app.get('/getPostsByRange', function(req, res){
 		lonMin = parseFloat(req.query.lonMin),
 		latMax = parseFloat(req.query.latMax),
 		lonMax = parseFloat(req.query.lonMax);
-	console.log('latMin='+latMin+'\n'+
+	/*console.log('latMin='+latMin+'\n'+
 		'lonMin='+lonMin+'\n'+
 		'latMax='+latMax+'\n'+
-		'lonMax='+lonMax+'\n');
+		'lonMax='+lonMax+'\n');*/
 
 	var qry = 'SELECT messageID,posterID,content,lat,lon,numUpvotes,numDownvotes,timePosted,uname' + 
 		' FROM HeadMessage JOIN H_User ON H_User.userID=HeadMessage.posterID' +
@@ -135,6 +136,7 @@ app.get('/getPostsByRange', function(req, res){
 		' AND lat<=' + mysql.escape(latMax) + 
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
+	logIP(req);
 	console.log(qry);
 	database.connection.query(qry, function(err, result) { 
 		if (err){
