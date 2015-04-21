@@ -51,7 +51,7 @@ do_start()
 		|| return 1
 	start-stop-daemon --start --quiet --chuid $DAEMONUSER    \
 	 --make-pidfile --pidfile $PIDFILE --background       \
-	 --startas /bin/bash -- -c "exec $DAEMON $DAEMON_ARGS > /var/log/hermes/server.log 2> /var/log/hermes/error.log"
+	 --startas /bin/bash -- -c "exec $DAEMON $DAEMON_ARGS > /var/log/hermes/server.log 2> /var/log/hermes/error.log" \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready
 	# to handle requests from services started subsequently which depend
