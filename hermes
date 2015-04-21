@@ -20,6 +20,7 @@ DESC="Hermes server"
 NAME=hermes
 DAEMON=/home/hermes/serverside/server.js
 DAEMON_ARGS="--options args"
+DAEMON_USER=hermes
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
@@ -48,8 +49,9 @@ do_start()
 	#   2 if daemon could not be started
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
-		$DAEMON_ARGS \
+	start-stop-daemon --start --quiet --chuid $DAEMONUSER    \
+	 --make-pidfile --pidfile $PIDFILE --background       \
+	 --startas /bin/bash -- -c "exec $DAEMON $DAEMON_ARGS > /var/log/hermes/server.log 2> /var/log/hermes/error.log"
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready
 	# to handle requests from services started subsequently which depend
