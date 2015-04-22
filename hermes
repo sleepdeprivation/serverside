@@ -18,8 +18,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Hermes server"
 NAME=hermes
-DAEMON=/home/hermes/serverside/server.js
-DAEMON_ARGS=""
+DAEMON=/usr/bin/nodejs
+DAEMON_ARGS="/home/hermes/serverside/server.js"
 DAEMONUSER=hermes
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
