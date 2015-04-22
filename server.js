@@ -62,7 +62,7 @@ function logIP(req){
 	var currentdate = new Date();
 	var timestamp = currentdate.getFullYear()+'/'+(currentdate.getMonth()+1)+'/'+currentdate.getDate()+' '+
 		currentdate.getHours()+':'+currentdate.getMinutes()+':'+currentdate.getSeconds();
-	console.log(ip + ' ' + timestamp);
+	console.log(ip + ' - ' + timestamp);
 }
 
 //Debug UI, remove later
@@ -96,7 +96,7 @@ app.post('/submit/newop', function(req, res){
 			res.send(result);
 		}
 	});
-	//logIP(req);
+	logIP(req);
 	console.log(qry.sql);
 });
 
@@ -110,6 +110,7 @@ app.post('/submit/newreply', function(req, res) {
                         res.send(result);
                 }
 	});
+	logIP(req);
 	console.log(qry.sql);
 });
 
@@ -178,6 +179,7 @@ app.get('/getRepliesTo', function(req, res){
 	var qry = 'SELECT messageID,posterID,parentID,content,numUpvotes,numDownvotes,timePosted,uname' +
 		' FROM ReplyMessage JOIN H_User ON H_User.userID=ReplyMessage.posterID' +
 		' WHERE parentID=' + mysql.escape(parentID);
+	logIP(req);
 	console.log(qry);
 	database.connection.query(qry, function(err, result) {
 		if (err) {
