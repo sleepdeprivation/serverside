@@ -9,14 +9,16 @@ app.use(bodyParser.json());
 //this table exists
 //create the User table if it does not exist
 database.connection.query(database.useDatabaseQry, function (err) {
-    if (err) throw err;
+    if (err) {
+	console.error('['+timestamp()+'] '+err);
+    }
 });
 
 function getUserPosts(userID, callback){
 	database.connection.query('select username from HeadMessage where userID=?;', [userID],
 		function (err, result){
 			if(err){
-				console.log(err);
+				console.error('['+timestamp()+'] '+err);
 				callback(true);
 				return;
 			}
@@ -29,7 +31,7 @@ function getChildrenOf(messageID, callback){
 	database.connection.query('select * from ReplyMessages where parentID=?;', [messageID],
 		function (err, result){
 			if(err){
-				console.log(err);
+				console.error('['+timestamp()+'] '+err);
 				callback(true);
 				return;
 			}
@@ -43,7 +45,7 @@ function getAllHeads(callback){
 	database.connection.query('select * from HeadMessage;',
 		function (err, result){
 			if(err){
-				console.log(err);
+				console.error('['+timestamp()+'] '+err);
 				callback(true);
 				return;
 			}
@@ -58,10 +60,14 @@ function logIP(req){
 		req.connection.remoteAddress ||
 		req.socket.remoteAddress ||
 		req.connection.socket.remoteAddress;
+	return ip;
+}
+
+function timestamp() {
 	var currentdate = new Date();
-	var timestamp = currentdate.getFullYear()+'/'+(currentdate.getMonth()+1)+'/'+currentdate.getDate()+' '+
+	var ts = currentdate.getFullYear()+'/'+(currentdate.getMonth()+1)+'/'+currentdate.getDate()+' '+
 		currentdate.getHours()+':'+currentdate.getMinutes()+':'+currentdate.getSeconds();
-	console.log(ip + ' - ' + timestamp);
+	return ts;
 }
 
 //Debug UI, remove later
@@ -85,32 +91,31 @@ app.get('/', function(req, res){
 	Probably we should set up different routes expecting different inputs
 */	
 app.post('/submit/newop', function(req, res){
-	//console.log(req.body);
 	var jspost = req.body;
 	var qry = database.connection.query('INSERT INTO HeadMessage SET ?;', jspost,
 	function(err, result) { 
 		if (err){
 			res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err);
 		}else{
 			res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] ' + qry.sql);
 		}
 	});
-	logIP(req);
-	console.log(qry.sql);
+
 });
 
 app.post('/submit/newreply', function(req, res) {
-	//console.log(req.body);
 	var jspost = req.body;
 	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
 	        if (err){
                         res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err);
                 }else{
                         res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] ' + qry.sql);
                 }
 	});
-	logIP(req);
-	console.log(qry.sql);
 });
 
 /*
@@ -125,10 +130,6 @@ app.get('/getPostsByRange', function(req, res){
 		lonMin = parseFloat(req.query.lonMin),
 		latMax = parseFloat(req.query.latMax),
 		lonMax = parseFloat(req.query.lonMax);
-	/*console.log('latMin='+latMin+'\n'+
-		'lonMin='+lonMin+'\n'+
-		'latMax='+latMax+'\n'+
-		'lonMax='+lonMax+'\n');*/
 
 	var qry = 'SELECT messageID,posterID,content,lat,lon,numUpvotes,numDownvotes,timePosted,uname' + 
 		' FROM HeadMessage JOIN H_User ON H_User.userID=HeadMessage.posterID' +
@@ -136,41 +137,17 @@ app.get('/getPostsByRange', function(req, res){
 		' AND lat<=' + mysql.escape(latMax) + 
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
-	logIP(req);
-	console.log(qry);
+
 	database.connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
 		}
 		else {
-			console.log(result);
 			res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] '+qry);
 		}
 	});
-	//console.log(qry.sql);
-});
-
-app.get('/getPostsByUser', function(req, res){
-	var userID = parseInt(req.query.userid);
-
-	//good to know:
-	//console.log(parseInt("asdf"));	//NaN
-	//console.log(parseInt("1.234"));	//1
-
-	if(userID != NaN){
-
-		getUserPosts(userID, function(status, result){
-			if(!status){
-				console.log(result);
-				res.setHeader('Content-Type', 'application/json');
-				res.end(JSON.stringify(result));
-			}else{
-				res.send("lookup failed");
-			}
-		});
-	}else{
-		res.send("failed");
-	}
 });
 
 app.get('/getRepliesTo', function(req, res){
@@ -178,15 +155,15 @@ app.get('/getRepliesTo', function(req, res){
 	var qry = 'SELECT messageID,posterID,parentID,content,numUpvotes,numDownvotes,timePosted,uname' +
 		' FROM ReplyMessage JOIN H_User ON H_User.userID=ReplyMessage.posterID' +
 		' WHERE parentID=' + mysql.escape(parentID);
-	logIP(req);
-	console.log(qry);
+
 	database.connection.query(qry, function(err, result) {
 		if (err) {
 			res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
 		}
 		else {
-			console.log(result);
 			res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] '+qry);
 		}
 	});
 });
@@ -216,7 +193,28 @@ app.get('/getRepliesTo/old', function(req, res){
 	}
 });
 
+app.get('/getPostsByUser', function(req, res){
+	var userID = parseInt(req.query.userid);
 
+	//good to know:
+	//console.log(parseInt("asdf"));	//NaN
+	//console.log(parseInt("1.234"));	//1
+
+	if(userID != NaN){
+
+		getUserPosts(userID, function(status, result){
+			if(!status){
+				console.log(result);
+				res.setHeader('Content-Type', 'application/json');
+				res.end(JSON.stringify(result));
+			}else{
+				res.send("lookup failed");
+			}
+		});
+	}else{
+		res.send("failed");
+	}
+});
 
 app.get('/getAllHeads', function(req, res){
 	getAllHeads(function(status, result){
@@ -229,10 +227,6 @@ app.get('/getAllHeads', function(req, res){
 	});
 	
 });
-
-
-
-
 
 
 
