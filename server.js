@@ -92,14 +92,14 @@ app.get('/', function(req, res){
 */	
 app.post('/submit/newop', function(req, res){
 	var jspost = req.body;
-	var qry = database.connection.query('INSERT INTO HeadMessage SET ?;', jspost,
-	function(err, result) { 
+	var qry = mysql.format('INSERT INTO HeadMessage SET ?', jspost);
+	database.connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
-			console.error(logIP(req)+' ['+timestamp()+'] '+err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
 		}else{
 			res.send(result);
-			console.log(logIP(req)+' ['+timestamp()+'] ' + qry.sql);
+			console.log(logIP(req)+' ['+timestamp()+'] ' + qry);
 		}
 	});
 
@@ -107,13 +107,14 @@ app.post('/submit/newop', function(req, res){
 
 app.post('/submit/newreply', function(req, res) {
 	var jspost = req.body;
-	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
+	var qry = mysql.format('INSERT INTO ReplyMessage SET ?', jspost);
+	database.connection.query(qry, function(err, result) {
 	        if (err){
                         res.send(err);
-			console.error(logIP(req)+' ['+timestamp()+'] '+err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
                 }else{
                         res.send(result);
-			console.log(logIP(req)+' ['+timestamp()+'] ' + qry.sql);
+			console.log(logIP(req)+' ['+timestamp()+'] ' + qry);
                 }
 	});
 });
