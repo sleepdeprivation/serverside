@@ -27,33 +27,6 @@ function getUserPosts(userID, callback){
 	);
 }
 
-function getChildrenOf(messageID, callback){
-	database.connection.query('select * from ReplyMessages where parentID=?;', [messageID],
-		function (err, result){
-			if(err){
-				console.error('['+timestamp()+'] '+err);
-				callback(true);
-				return;
-			}
-			callback(false, result);
-		}
-	);
-}
-
-
-function getAllHeads(callback){
-	database.connection.query('select * from HeadMessage;',
-		function (err, result){
-			if(err){
-				console.error('['+timestamp()+'] '+err);
-				callback(true);
-				return;
-			}
-			callback(false, result);
-		}
-	);
-}
-
 // get client's IP for logging purposes
 function logIP(req){
 	var ip = req.headers['x-forwarded-for'] ||
@@ -215,18 +188,6 @@ app.get('/getPostsByUser', function(req, res){
 	}else{
 		res.send("failed");
 	}
-});
-
-app.get('/getAllHeads', function(req, res){
-	getAllHeads(function(status, result){
-		res.setHeader('Content-Type', 'application/json');
-		if(!status){
-			res.end(JSON.stringify(result));
-		}else{
-			res.end("[]");
-		}
-	});
-	
 });
 
 
