@@ -1,4 +1,3 @@
-#!/usr/bin/nodejs
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
@@ -10,14 +9,16 @@ app.use(bodyParser.json());
 //this table exists
 //create the User table if it does not exist
 database.connection.query(database.useDatabaseQry, function (err) {
-    if (err) throw err;
+    if (err) {
+	console.error('['+timestamp()+'] '+err);
+    }
 });
 
 function getUserPosts(userID, callback){
 	database.connection.query('select username from HeadMessage where userID=?;', [userID],
 		function (err, result){
 			if(err){
-				console.log(err);
+				console.error('['+timestamp()+'] '+err);
 				callback(true);
 				return;
 			}
@@ -26,37 +27,25 @@ function getUserPosts(userID, callback){
 	);
 }
 
-function getChildrenOf(messageID, callback){
-	database.connection.query('select * from ReplyMessages where parentID=?;', [messageID],
-		function (err, result){
-			if(err){
-				console.log(err);
-				callback(true);
-				return;
-			}
-			callback(false, result);
-		}
-	);
+// get client's IP for logging purposes
+function logIP(req){
+	var ip = req.headers['x-forwarded-for'] ||
+		req.connection.remoteAddress ||
+		req.socket.remoteAddress ||
+		req.connection.socket.remoteAddress;
+	return ip;
 }
 
-
-function getAllHeads(callback){
-	database.connection.query('select * from HeadMessage;',
-		function (err, result){
-			if(err){
-				console.log(err);
-				callback(true);
-				return;
-			}
-			callback(false, result);
-		}
-	);
+function timestamp() {
+	var currentdate = new Date();
+	var ts = currentdate.getFullYear()+'/'+(currentdate.getMonth()+1)+'/'+currentdate.getDate()+' '+
+		currentdate.getHours()+':'+currentdate.getMinutes()+':'+currentdate.getSeconds();
+	return ts;
 }
 
 //Debug UI, remove later
 app.get('/', function(req, res){
 	var responseHTML = '<h1>Debug frontend for Hermes DB</h1>\n' +
-		'<p><a href="/submit">Submit routes</a></p>\n' +
 		'<form action="/getPostsByRange">\n' + 
 		'<p>getPostsByRange</p>\n' +
 		'latMin: <input type="text" id="latMin" name="latMin" /><br />\n' +
@@ -68,17 +57,6 @@ app.get('/', function(req, res){
 	res.send(responseHTML);
 });
 
-app.get('/submit', function (req, res){
-	var responseHTML = 	'<form method="post" action="/submit/newop">\n' + 
-				'<input type="submit" name="submitop" value="Submit test OP">\n' + 
-				'</form>\n<br />\n';
-	//reply route hasn't been set up yet
-	//var responseHTML +=	'<form method="post" action="/submit/newreply>\n' + 
-	//			'<input type="submit" name="submitreply" value="Submit test reply">\n'+
-	//			'</form>';
-	res.send(responseHTML);
-});
-
 /*
 	Template for incoming requests
 	JSON block will be in req.body. It will need to be
@@ -86,30 +64,32 @@ app.get('/submit', function (req, res){
 	Probably we should set up different routes expecting different inputs
 */	
 app.post('/submit/newop', function(req, res){
-	console.log(req.body);
 	var jspost = req.body;
-	var qry = database.connection.query('INSERT INTO HeadMessage SET ?;', jspost,
-	function(err, result) { 
+	var qry = mysql.format('INSERT INTO HeadMessage SET ?', jspost);
+	database.connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
 		}else{
 			res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] ' + qry);
 		}
 	});
-	console.log(qry.sql);
+
 });
 
 app.post('/submit/newreply', function(req, res) {
-	console.log(req.body);
 	var jspost = req.body;
-	var qry = database.connection.query('INSERT INTO ReplyMessage SET ?', jspost, function(err, result) {
+	var qry = mysql.format('INSERT INTO ReplyMessage SET ?', jspost);
+	database.connection.query(qry, function(err, result) {
 	        if (err){
                         res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
                 }else{
                         res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] ' + qry);
                 }
 	});
-	console.log(qry.sql);
 });
 
 /*
@@ -124,10 +104,6 @@ app.get('/getPostsByRange', function(req, res){
 		lonMin = parseFloat(req.query.lonMin),
 		latMax = parseFloat(req.query.latMax),
 		lonMax = parseFloat(req.query.lonMax);
-	console.log('latMin='+latMin+'\n'+
-		'lonMin='+lonMin+'\n'+
-		'latMax='+latMax+'\n'+
-		'lonMax='+lonMax+'\n');
 
 	var qry = 'SELECT messageID,posterID,content,lat,lon,numUpvotes,numDownvotes,timePosted,uname' + 
 		' FROM HeadMessage JOIN H_User ON H_User.userID=HeadMessage.posterID' +
@@ -135,40 +111,17 @@ app.get('/getPostsByRange', function(req, res){
 		' AND lat<=' + mysql.escape(latMax) + 
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
-	console.log(qry);
+
 	database.connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
 		}
 		else {
-			console.log(result);
 			res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] '+qry);
 		}
 	});
-	//console.log(qry.sql);
-});
-
-app.get('/getPostsByUser', function(req, res){
-	var userID = parseInt(req.query.userid);
-
-	//good to know:
-	//console.log(parseInt("asdf"));	//NaN
-	//console.log(parseInt("1.234"));	//1
-
-	if(userID != NaN){
-
-		getUserPosts(userID, function(status, result){
-			if(!status){
-				console.log(result);
-				res.setHeader('Content-Type', 'application/json');
-				res.end(JSON.stringify(result));
-			}else{
-				res.send("lookup failed");
-			}
-		});
-	}else{
-		res.send("failed");
-	}
 });
 
 app.get('/getRepliesTo', function(req, res){
@@ -176,14 +129,15 @@ app.get('/getRepliesTo', function(req, res){
 	var qry = 'SELECT messageID,posterID,parentID,content,numUpvotes,numDownvotes,timePosted,uname' +
 		' FROM ReplyMessage JOIN H_User ON H_User.userID=ReplyMessage.posterID' +
 		' WHERE parentID=' + mysql.escape(parentID);
-	console.log(qry);
+
 	database.connection.query(qry, function(err, result) {
 		if (err) {
 			res.send(err);
+			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
 		}
 		else {
-			console.log(result);
 			res.send(result);
+			console.log(logIP(req)+' ['+timestamp()+'] '+qry);
 		}
 	});
 });
@@ -213,23 +167,28 @@ app.get('/getRepliesTo/old', function(req, res){
 	}
 });
 
+app.get('/getPostsByUser', function(req, res){
+	var userID = parseInt(req.query.userid);
 
+	//good to know:
+	//console.log(parseInt("asdf"));	//NaN
+	//console.log(parseInt("1.234"));	//1
 
-app.get('/getAllHeads', function(req, res){
-	getAllHeads(function(status, result){
-		res.setHeader('Content-Type', 'application/json');
-		if(!status){
-			res.end(JSON.stringify(result));
-		}else{
-			res.end("[]");
-		}
-	});
-	
+	if(userID != NaN){
+
+		getUserPosts(userID, function(status, result){
+			if(!status){
+				console.log(result);
+				res.setHeader('Content-Type', 'application/json');
+				res.end(JSON.stringify(result));
+			}else{
+				res.send("lookup failed");
+			}
+		});
+	}else{
+		res.send("failed");
+	}
 });
-
-
-
-
 
 
 
