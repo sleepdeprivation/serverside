@@ -1,21 +1,55 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
-var database = require('./database.js');
+var database = require('./database.js');	//see README.md for info on how this file should be constructed
 
 var app = express();
 app.use(bodyParser.json());
 
-//this table exists
-//create the User table if it does not exist
-database.connection.query(database.useDatabaseQry, function (err) {
-    if (err) {
-	console.error('['+timestamp()+'] '+err);
-    }
-});
+
+// Attempt to connect to MySQL database
+var db_config = database.db_config;
+var connection;
+var MAX_ATTEMPTS = 10;
+
+function dbconn(att) {
+	connection = mysql.createConnection(db_config);
+	connection.connect(function(err) {
+		if (err) {
+			//if connection goes down, wait two seconds, then attempt to reconnect
+			if (att <= MAX_ATTEMPTS) {
+				console.error('['+timestamp()+'] '+err+' Attempting to reconnect ('+att+'/'+MAX_ATTEMPTS+')...');
+				setTimeout(function(){dbconn(att+1)}, 5000);
+			}
+			//after a certain amount of failed attempts, give up and throw an exception
+			else { 
+				console.error('['+timestamp()+'] FATAL: Maximum number of reconnect attempts reached.');
+				throw err; 
+			}
+			
+		}
+		//reset number of connection attempts if successful (NOT WORKING ATM)
+		//else {
+		//	att = 0
+		//}
+	});
+
+	connection.on('error', function(err) {
+		console.error('['+timestamp()+'] '+err.code);
+		if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+			setTimeout(function(){dbconn(att+1)}, 5000);
+		}
+		else {
+			throw err;
+		}
+	});
+}
+
+dbconn(0);
+
 
 function getUserPosts(userID, callback){
-	database.connection.query('select username from HeadMessage where userID=?;', [userID],
+	connection.query('select username from HeadMessage where userID=?;', [userID],
 		function (err, result){
 			if(err){
 				console.error('['+timestamp()+'] '+err);
@@ -66,7 +100,7 @@ app.get('/', function(req, res){
 app.post('/submit/newop', function(req, res){
 	var jspost = req.body;
 	var qry = mysql.format('INSERT INTO HeadMessage SET ?', jspost);
-	database.connection.query(qry, function(err, result) { 
+	connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
 			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
@@ -81,7 +115,7 @@ app.post('/submit/newop', function(req, res){
 app.post('/submit/newreply', function(req, res) {
 	var jspost = req.body;
 	var qry = mysql.format('INSERT INTO ReplyMessage SET ?', jspost);
-	database.connection.query(qry, function(err, result) {
+	connection.query(qry, function(err, result) {
 	        if (err){
                         res.send(err);
 			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
@@ -112,7 +146,7 @@ app.get('/getPostsByRange', function(req, res){
 		' AND lon>=' + mysql.escape(lonMin) + 
 		' AND lon<=' + mysql.escape(lonMax);
 
-	database.connection.query(qry, function(err, result) { 
+	connection.query(qry, function(err, result) { 
 		if (err){
 			res.send(err);
 			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
@@ -130,7 +164,7 @@ app.get('/getRepliesTo', function(req, res){
 		' FROM ReplyMessage JOIN H_User ON H_User.userID=ReplyMessage.posterID' +
 		' WHERE parentID=' + mysql.escape(parentID);
 
-	database.connection.query(qry, function(err, result) {
+	connection.query(qry, function(err, result) {
 		if (err) {
 			res.send(err);
 			console.error(logIP(req)+' ['+timestamp()+'] '+err+' '+qry);
