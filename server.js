@@ -27,7 +27,7 @@ function dbconn(att) {
 		}
 	});
 
-	connection.on('error', function(err) {
+	database.connection.on('error', function(err) {
 		console.error('['+timestamp()+'] '+err.code);
 		if(err.code === 'PROTOCOL_CONNECTION_LOST') {
 			dbconn(att++);
