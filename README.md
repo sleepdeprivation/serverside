@@ -20,11 +20,6 @@ exports.connection = mysql.createConnection({
     password: 'MySQL password',
     database: 'MySQL database name'
 });
-
-var dbToUse = 'Hermes';
-
-//use the database for any queries run
-exports.useDatabaseQry = 'USE ' + dbToUse;
 ```
 
 `hermes` is a SysVInit script for starting and stopping the server.js frontend
