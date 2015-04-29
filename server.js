@@ -6,13 +6,40 @@ var database = require('./database.js');
 var app = express();
 app.use(bodyParser.json());
 
+var MAX_ATTEMPTS = 10;
 //this table exists
 //create the User table if it does not exist
-database.connection.query(database.useDatabaseQry, function (err) {
-    if (err) {
-	console.error('['+timestamp()+'] '+err);
-    }
-});
+function dbconn(att) {
+	//database.connection.query(database.useDatabaseQry, function (err) {
+	database.connection.connect(function(err) {
+		if (err) {
+			//if connection goes down, wait two seconds, then attempt to reconnect
+			if (att <= MAX_ATTEMPTS) {
+				console.error('['+timestamp()+'] '+err+' Attempting to reconnect ('+att+'/'+MAX_ATTEMPTS+')...');
+				setTimeout(dbconn(att++), 2000);
+			}
+			//after a certain amount of failed attempts, give up and throw an exception
+			else { throw err }
+			console.error('['+timestamp()+'] '+err);
+		}
+		else {
+			att = 0
+		}
+	});
+
+	connection.on('error', function(err) {
+		console.error('['+timestamp()+'] '+err.code);
+		if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+			dbconn(att++);
+		}
+		else {
+			throw err;
+		}
+	});
+}
+
+dbconn(0);
+
 
 function getUserPosts(userID, callback){
 	database.connection.query('select username from HeadMessage where userID=?;', [userID],

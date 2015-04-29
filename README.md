@@ -17,7 +17,8 @@ var mysql = require('mysql');
 exports.connection = mysql.createConnection({
     host: 'MySQL server address, usually localhost',
     user: 'MySQL username',
-    password: 'MySQL password'
+    password: 'MySQL password',
+    database: 'MySQL database name'
 });
 
 var dbToUse = 'Hermes';
@@ -25,3 +26,9 @@ var dbToUse = 'Hermes';
 //use the database for any queries run
 exports.useDatabaseQry = 'USE ' + dbToUse;
 ```
+
+`hermes` is a SysVInit script for starting and stopping the server.js frontend
+* usage: service hermes {start|stop|restart} (requires root)
+* stdout is logged to /var/log/hermes/server.log
+* stderr is logged to /var/log/hermes/error.log
+* TODO: add in functionality for updating (stop, pull latest from Github, start), improve restart functionality if MySQL goes down
