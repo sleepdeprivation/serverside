@@ -19,7 +19,7 @@ function dbconn(att) {
 			//if connection goes down, wait two seconds, then attempt to reconnect
 			if (att <= MAX_ATTEMPTS) {
 				console.error('['+timestamp()+'] '+err+' Attempting to reconnect ('+att+'/'+MAX_ATTEMPTS+')...');
-				setTimeout(dbconn(att+1), 2000);
+				setTimeout(dbconn(att+1), 5000);
 			}
 			//after a certain amount of failed attempts, give up and throw an exception
 			else { 
@@ -37,7 +37,7 @@ function dbconn(att) {
 	connection.on('error', function(err) {
 		console.error('['+timestamp()+'] '+err.code);
 		if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-			setTimeout(dbconn(att+1), 2000);
+			setTimeout(dbconn(att+1), 5000);
 		}
 		else {
 			throw err;
