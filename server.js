@@ -10,18 +10,16 @@ app.use(bodyParser.json());
 // Attempt to connect to MySQL database
 var db_config = database.db_config;
 var connection;
-var attempts = 0;
 var MAX_ATTEMPTS = 10;
 
-function dbconn() {
+function dbconn(att) {
 	connection = mysql.createConnection(db_config);
 	connection.connect(function(err) {
 		if (err) {
 			//if connection goes down, wait two seconds, then attempt to reconnect
-			if (attempts <= MAX_ATTEMPTS) {
-				console.error('['+timestamp()+'] '+err+' Attempting to reconnect ('+attempts+'/'+MAX_ATTEMPTS+')...');
-				attempts++;
-				setTimeout(dbconn, 5000);
+			if (att <= MAX_ATTEMPTS) {
+				console.error('['+timestamp()+'] '+err+' Attempting to reconnect ('+att+'/'+MAX_ATTEMPTS+')...');
+				setTimeout(dbconn, 5000, att+1);
 			}
 			//after a certain amount of failed attempts, give up and throw an exception
 			else { 
@@ -30,16 +28,16 @@ function dbconn() {
 			}
 			
 		}
-		//reset number of connection attempts if successful
-		else {
-			att = 0
-		}
+		//reset number of connection attempts if successful (NOT WORKING ATM)
+		//else {
+		//	att = 0
+		//}
 	});
 
 	connection.on('error', function(err) {
 		console.error('['+timestamp()+'] '+err.code);
 		if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-			setTimeout(dbconn, 5000);
+			setTimeout(dbconn, 5000, att+1);
 		}
 		else {
 			throw err;
@@ -47,7 +45,7 @@ function dbconn() {
 	});
 }
 
-dbconn();
+dbconn(0);
 
 
 function getUserPosts(userID, callback){
