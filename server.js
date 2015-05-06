@@ -3,11 +3,11 @@ var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var database = require('./database.js');	//see README.md for info on how this file should be constructed
 
-//stuff needed for https, using debian's self-signed cert because we're scrubs
+//stuff needed for https, using a self-signed cert because we're scrubs
 var https = require('https');
 var fs = require('fs');
-var privateKey = fs.readFileSync('/etc/ssl/private/ssl-cert-snakeoil.key');
-var certificate = fs.readFileSync('/etc/ssl/certs/ssl-cert-snakeoil.pem');
+var privateKey = fs.readFileSync('hermes.key');
+var certificate = fs.readFileSync('hermes.crt');
 var ssl_creds = {key: privateKey, cert: certificate};
 
 var app = express();

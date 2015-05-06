@@ -1,1 +1,4 @@
 database.js
+hermes.crt
+hermes.csr
+hermes.key
