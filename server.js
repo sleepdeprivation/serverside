@@ -6,8 +6,8 @@ var database = require('./database.js');	//see README.md for info on how this fi
 //stuff needed for https, using a self-signed cert because we're scrubs
 var https = require('https');
 var fs = require('fs');
-var privateKey = fs.readFileSync('hermes.key');
-var certificate = fs.readFileSync('hermes.crt');
+var privateKey = fs.readFileSync('/home/hermes/serverside/hermes.key');
+var certificate = fs.readFileSync('/home/hermes/serverside/hermes.crt');
 var ssl_creds = {key: privateKey, cert: certificate};
 
 var app = express();
