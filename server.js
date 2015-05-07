@@ -147,7 +147,8 @@ app.get('/getPostsByRange', function(req, res){
 		' WHERE lat>=' + mysql.escape(latMin) +
 		' AND lat<=' + mysql.escape(latMax) + 
 		' AND lon>=' + mysql.escape(lonMin) + 
-		' AND lon<=' + mysql.escape(lonMax);
+		' AND lon<=' + mysql.escape(lonMax) +
+		' ORDER BY timePosted DESC';
 
 	connection.query(qry, function(err, result) { 
 		if (err){
